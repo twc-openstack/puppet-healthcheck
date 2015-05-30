@@ -38,3 +38,45 @@ The time to sleep in seconds between ‘tries’. Default: 1
 ####`timeout`
 
 Number of seconds to wait before timing out. Default: 60
+
+### provider: http_conn_validator
+
+`http_conn_validator` is used to verify that an http server is answering on a given port.
+It could be used to test either a remote or a local service. It support both IPv4 and
+IPv6 connection string.
+
+```puppet
+http_conn_validator { 'foo-machine home' :
+  server  => '127.0.0.1',
+  port    => 80,
+  use_ssl => true,
+}
+```
+
+The namevar of this resource can also be the connection string. It comes handy when
+one already have an array of URLs string to test.
+
+```puppet
+appli_cluster_nodes = ['https://server1.com/test-url', 'https://server2.com/test-url']
+http_conn_validator { $appli_cluster_nodes : }
+```
+
+####`server`
+
+The DNS name or IP address of the HTTP server.
+
+####`port`
+
+The port to check on the HTTP server.
+
+####`use_ssl`
+
+Whether the connection will be attempted using https. Default: false
+
+####`test_url`
+
+URL to use for testing if the HTTP server is up. Default: /
+
+####`timeout`
+
+Number of second to wait before timing out. Default: 15
