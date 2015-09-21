@@ -8,6 +8,7 @@ module PuppetX
       attr_reader :use_ssl
       attr_reader :test_path
       attr_reader :test_headers
+      attr_reader :expected_code
 
       def initialize(http_resource_name, http_server, http_port, use_ssl, test_path, expected_code)
          if http_resource_name =~ /\A#{URI::regexp}\z/
@@ -22,6 +23,7 @@ module PuppetX
             @use_ssl     = use_ssl
             @test_path   = test_path
           end
+          @expected_code = expected_code
           @test_headers = { "Accept" => "application/json" }
       end
 
@@ -34,13 +36,13 @@ module PuppetX
         conn = Puppet::Network::HttpPool.http_instance(http_server, http_port, use_ssl)
 
         response = conn.get(test_path, test_headers)
-        unless response.kind_of?(Net::HTTPSuccess)
-          Puppet.notice "Unable to connect to the server (http#{use_ssl ? "s" : ""}://#{http_server}:#{http_port}): [#{response.code}] #{response.msg}"
+        unless response.code.to_i == @expected_code
+          Puppet.notice "Unable to connect to the server or wrong HTTP code (expected #{@expected_code}) (http#{@use_ssl ? "s" : ""}://#{@http_server}:#{@http_port}): [#{@response.code}] #{@response.msg}"
           return false
         end
         return true
       rescue Exception => e
-        Puppet.notice "Unable to connect to the server (http#{use_ssl ? "s" : ""}://#{http_server}:#{http_port}): #{e.message}"
+        Puppet.notice "Unable to connect to the server (http#{@use_ssl ? "s" : ""}://#{@http_server}:#{@http_port}): #{e.message}"
         return false
       end
     end
