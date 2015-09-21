@@ -9,20 +9,20 @@ module PuppetX
       attr_reader :test_path
       attr_reader :test_headers
 
-      def initialize(http_resource_name, http_server, http_port, use_ssl, test_path)
-       begin
-          uri = URI(http_resource_name)
-          @http_server = uri.host
-          @http_port   = uri.port
-          @use_ssl     = uri.scheme.eql?('https') ? true : false
-          @test_path   = uri.request_uri
-        rescue
-          @http_server = http_server
-          @http_port   = http_port
-          @use_ssl     = use_ssl
-          @test_path   = test_path
-        end
-        @test_headers = { "Accept" => "application/json" }
+      def initialize(http_resource_name, http_server, http_port, use_ssl, test_path, expected_code)
+         if http_resource_name =~ /\A#{URI::regexp}\z/
+            uri = URI(http_resource_name)
+            @http_server = uri.host
+            @http_port   = uri.port
+            @use_ssl     = uri.scheme.eql?('https') ? true : false
+            @test_path   = uri.request_uri
+         else
+            @http_server = http_server
+            @http_port   = http_port
+            @use_ssl     = use_ssl
+            @test_path   = test_path
+          end
+          @test_headers = { "Accept" => "application/json" }
       end
 
       # Utility method; attempts to make an http/https connection to a server.
