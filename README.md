@@ -39,15 +39,15 @@ The time to sleep in seconds between ‘tries’. Default: 1
 
 Number of seconds to wait before timing out. Default: 60
 
-### provider: http_conn_validator
+### http_conn_validator
 
 `http_conn_validator` is used to verify that an http server is answering on a given port.
 It could be used to test either a remote or a local service. It support both IPv4 and
-IPv6 connection string.
+IPv6 connection strings. It also works with hostname.
 
 ```puppet
 http_conn_validator { 'foo-machine home' :
-  server  => '127.0.0.1',
+  home    => '127.0.0.1',
   port    => 80,
   use_ssl => true,
 }
@@ -61,13 +61,13 @@ appli_cluster_nodes = ['https://server1.com/test-url', 'https://server2.com/test
 http_conn_validator { $appli_cluster_nodes : }
 ```
 
-####`server`
+####`host`
 
-The DNS name or IP address of the HTTP server.
+IP address or server DNS name on which the service is supposed to be bound to. Required if the namevar is not a connection string.
 
 ####`port`
 
-The port to check on the HTTP server.
+Port on which the service is supposed to listen. Required if the namevar is not a connection string.
 
 ####`use_ssl`
 
@@ -77,6 +77,11 @@ Whether the connection will be attempted using https. Default: false
 
 URL to use for testing if the HTTP server is up. Default: /
 
+####`try_sleep`
+
+The time to sleep in seconds between ‘tries’. Default: 1
+
 ####`timeout`
 
-Number of second to wait before timing out. Default: 15
+Number of seconds to wait before timing out. Default: 60
+

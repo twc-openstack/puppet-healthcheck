@@ -20,6 +20,7 @@ Puppet::Type.type(:http_conn_validator).provide(:http_conn_validator) do
   def exists?
     start_time = Time.now
     timeout = resource[:timeout]
+    try_sleep = resource[:try_sleep]
 
     success = validator.attempt_connection
 
@@ -28,12 +29,14 @@ Puppet::Type.type(:http_conn_validator).provide(:http_conn_validator) do
       # especially on the first install.  Therefore, our first connection attempt
       # may fail.  Here we have somewhat arbitrarily chosen to retry every 2
       # seconds until the configurable timeout has expired.
-      Puppet.notice("Failed to make an HTTP connection; sleeping 2 seconds before retry")
-      sleep 2
+      Puppet.notice("Failed to make an HTTP connection; sleeping #{try_sleep} seconds before retry")
+      sleep try_sleep
       success = validator.attempt_connection
     end
 
-    unless success
+    if success
+      Puppet.debug("Connected to the host in #{Time.now - start_time} seconds.")
+    else
       Puppet.notice("Failed to make an HTTP connection within timeout window of #{timeout} seconds; giving up.")
     end
 
@@ -47,7 +50,7 @@ Puppet::Type.type(:http_conn_validator).provide(:http_conn_validator) do
     # If `#create` is called, that means that `#exists?` returned false, which
     # means that the connection could not be established... so we need to
     # cause a failure here.
-    raise Puppet::Error, "Unable to connect to the HTTP server! (#{@validator.http_server}:#{@validator.http_port} with HTTP code #{@validator.expected_code})"
+    raise Puppet::Error, "Unable to connect to the HTTP server! (#{@validator.http_server}:#{@validator.http_port})"
   end
 
   # Returns the existing validator, if one exists otherwise creates a new object
@@ -55,7 +58,7 @@ Puppet::Type.type(:http_conn_validator).provide(:http_conn_validator) do
   #
   # @api private
   def validator
-    @validator ||= PuppetX::PuppetCommunity::HttpValidator.new(resource[:name], resource[:server], resource[:port], resource[:use_ssl], resource[:test_url], resource[:expected_code])
+    @validator ||= PuppetX::PuppetCommunity::HttpValidator.new(resource[:name], resource[:host], resource[:port], resource[:use_ssl], resource[:test_url])
   end
 
 end

@@ -15,12 +15,15 @@ Puppet::Type.newtype(:http_conn_validator) do
     desc 'An arbitrary name used as the identity of the resource.'
   end
 
-  newparam(:server) do
-    desc 'The DNS name or IP address of the HTTP server.'
+  newparam(:host) do
+    desc 'An array containing DNS names or IP addresses of the host where the expected service should be running.'
+    munge do |value|
+      Array(value).first
+    end
   end
 
   newparam(:port) do
-    desc 'The port to check on the HTTP server.'
+    desc 'The port that the server should be listening on.'
   end
 
   newparam(:use_ssl) do
@@ -33,9 +36,9 @@ Puppet::Type.newtype(:http_conn_validator) do
     defaultto '/'
   end
 
-  newparam(:expected_code) do
-    desc 'The HTTP status code that should be expected; defaults to 200.'
-    defaultto 200
+  newparam(:try_sleep) do
+    desc 'The time to sleep in seconds between ‘tries’.'
+    defaultto 1
 
     validate do |value|
       # This will raise an error if the string is not convertible to an integer
@@ -48,8 +51,8 @@ Puppet::Type.newtype(:http_conn_validator) do
   end
 
   newparam(:timeout) do
-    desc 'The max number of seconds that the validator should wait before giving up and deciding that the HTTP server is not running; defaults to 15 seconds.'
-    defaultto 15
+    desc 'The max number of seconds that the validator should wait before giving up and deciding that the service is not running; defaults to 60 seconds.'
+    defaultto 60
 
     validate do |value|
       # This will raise an error if the string is not convertible to an integer
